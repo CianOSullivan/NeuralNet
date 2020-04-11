@@ -1,4 +1,4 @@
-"""Shows the effect of bias weighting on the sigmoid function
+"""Shows the effect of weighting on the sigmoid function
    From page 6 of the document
 """
 
@@ -19,9 +19,9 @@ x = np.arange(-8, 8, 0.1)
 # List of weights with their corresponding labels
 weights = [(w1, l1), (w2, l2), (w3, l3)]
 
-for w, l in weights:
-    f = 1 / (1 + np.exp(-x*w)) # The sigmoid function
-    plt.plot(x, f, label=l)
+for weight, label in weights:
+    f = 1 / (1 + np.exp(-x*weight)) # The sigmoid function
+    plt.plot(x, f, label=label)
 
 # Draw the plot
 plt.xlabel('x')
