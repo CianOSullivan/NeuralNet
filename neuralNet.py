@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split  #
 from sklearn.metrics import accuracy_score
 import numpy as np                                    # This import takes a massive amount of time in python3 but not in python2
 import matplotlib.pylab as plt
+import time
 
 
 def convert_out_to_vect(output):
@@ -77,7 +78,7 @@ def calc_hidden_delta(delta_plus1, w_l, z_l):
     return np.dot(np.transpose(w_l), delta_plus1) * f_deriv(z_l)
 
 
-def train_nn(nn_structure, X, y, iter_num=4000, alpha=0.25):
+def train_nn(nn_structure, X, y, iter_num=1000, alpha=0.25):
     W, b = setup_init_weights(nn_structure)
     cnt = 0
     m = len(y)
@@ -127,6 +128,7 @@ def predict_y(W, b, X, n_layers):
 
 
 def main():
+    startTime = time.time()
     # Load the digits data set
     digits = load_digits()
     # Scale the digits data
@@ -147,15 +149,32 @@ def main():
     weights, bias = setup_init_weights(netStructure)
 
     W, b, avg_cost_func = train_nn(netStructure, inTrain, outTrainVect)
-    # Plot the given number as an example
-    plt.plot(avg_cost_func)
-    plt.ylabel('Average J')
-    plt.xlabel('Iteration number')
-
+    print("Model setup and trained in %.1f seconds" % round(time.time() - startTime, 1))
     y_pred = predict_y(W, b, inTest, 3)
-    print('Prediction accuracy is {}%'.format(accuracy_score(outTest, y_pred) * 100))
+    print('Prediction accuracy is {}%\n'.format(accuracy_score(outTest, y_pred) * 100))
 
-    plt.show()
+    while True:
+        print("What would you like to do?: ")
+        print("    (1) Visualise average cost function")
+        print("    (2) Predict a number")
+        print("    (3) Exit the program")
+
+        answer = input("-> ")
+        if answer == "1":
+            # Plot the given number as an example
+            plt.plot(avg_cost_func)
+            plt.ylabel('Average J')
+            plt.xlabel('Iteration number')
+            plt.show()
+        elif answer == "2":
+            print(inData)
+            print("")
+            print(digits.data)
+            print("Predicting a number")
+        elif answer == "3":
+            exit()
+        else:
+            print("Please enter a valid number")
 
 
 main()
