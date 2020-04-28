@@ -78,42 +78,49 @@ def calc_hidden_delta(delta_plus1, w_l, z_l):
     return np.dot(np.transpose(w_l), delta_plus1) * f_deriv(z_l)
 
 
-def train_nn(nn_structure, X, y, iter_num=1000, alpha=0.25):
-    W, b = setup_init_weights(nn_structure)
-    cnt = 0
-    m = len(y)
+def train_network(netStructure, X, y, iter_num=4000, alpha=0.25):
+    W, b = setup_init_weights(netStructure)
+    cnt = 0     # The number of training iterations
+    m = len(y)  # The length of output training vector
     avg_cost_func = []
     print('Starting gradient descent for {} iterations'.format(iter_num))
     while cnt < iter_num:
+        # Update progress of training
         if cnt % 500 == 0:
             print('Iteration {} of {}'.format(cnt, iter_num))
-        tri_W, tri_b = setup_delta_values(nn_structure)
+
+        delta_wght, delta_bias = setup_delta_values(netStructure)
         avg_cost = 0
+
         for i in range(len(y)):
             delta = {}
             # perform the feed forward pass and return the stored h and z values, to be used in the
             # gradient descent step
             h, z = feed_forward(X[i, :], W, b)
+
             # loop from nl-1 to 1 backpropagating the errors
-            for l in range(len(nn_structure), 0, -1):
-                if l == len(nn_structure):
-                    delta[l] = calc_output_delta(y[i, :], h[l], z[l])
-                    avg_cost += np.linalg.norm((y[i, :] - h[l]))
+            for layer in range(len(netStructure), 0, -1):
+                if layer == len(netStructure):
+                    delta[layer] = calc_output_delta(y[i, :], h[layer], z[layer])
+                    avg_cost += np.linalg.norm((y[i, :] - h[layer]))
                 else:
-                    if l > 1:
-                        delta[l] = calc_hidden_delta(delta[l + 1], W[l], z[l])
-                    # triW^(l) = triW^(l) + delta^(l+1) * transpose(h^(l))
-                    tri_W[l] += np.dot(delta[l + 1][:, np.newaxis], np.transpose(h[l][:, np.newaxis]))
-                    # trib^(l) = trib^(l) + delta^(l+1)
-                    tri_b[l] += delta[l + 1]
-        # perform the gradient descent step for the weights in each layer
-        for l in range(len(nn_structure) - 1, 0, -1):
-            W[l] += -alpha * (1.0 / m * tri_W[l])
-            b[l] += -alpha * (1.0 / m * tri_b[l])
+                    if layer > 1:
+                        delta[layer] = calc_hidden_delta(delta[layer + 1], W[layer], z[layer])
+                    # deltaW^(l) = deltaW^(l) + delta^(l+1) * transpose(h^(l))
+                    delta_wght[layer] += np.dot(delta[layer + 1][:, np.newaxis],
+                                                np.transpose(h[layer][:, np.newaxis]))
+                    # delta_b^(l) = delta_b^(l) + delta^(l+1)
+                    delta_bias[layer] += delta[layer + 1]
+
+        # Perform the gradient descent step for the weights in each layer
+        for layer in range(len(netStructure) - 1, 0, -1):
+            W[layer] += -alpha * (1.0 / m * delta_wght[layer])
+            b[layer] += -alpha * (1.0 / m * delta_bias[layer])
         # complete the average cost calculation
         avg_cost = 1.0 / m * avg_cost
         avg_cost_func.append(avg_cost)
         cnt += 1
+
     return W, b, avg_cost_func
 
 
@@ -128,6 +135,7 @@ def predict_y(W, b, X, n_layers):
 
 
 def main():
+    # Time the training of the model
     startTime = time.time()
     # Load the digits data set
     digits = load_digits()
@@ -140,15 +148,14 @@ def main():
     inTrain, inTest, outTrain, outTest = train_test_split(inData, outData, test_size=0.4)
     outTrainVect = convert_out_to_vect(outTrain)  # The vector which inTrain is compared against
     outTestVect = convert_out_to_vect(outTest)    # The vector which inTest is compared against
-    print("Created training vector of size: ", outTrain.size)
-    print("Created test vector of size: ", outTest.size)
+    print("Created training vector of {} items and test vector of {} items".format(outTrain.size,
+                                                                                   outTest.size))
     print(outTrainVect[0:9])
 
     # Create the structure of the NN
     netStructure = [64, 30, 10]
-    weights, bias = setup_init_weights(netStructure)
 
-    W, b, avg_cost_func = train_nn(netStructure, inTrain, outTrainVect)
+    W, b, avg_cost_func = train_network(netStructure, inTrain, outTrainVect)
     print("Model setup and trained in %.1f seconds" % round(time.time() - startTime, 1))
     y_pred = predict_y(W, b, inTest, 3)
     print('Prediction accuracy is {}%\n'.format(accuracy_score(outTest, y_pred) * 100))
@@ -177,4 +184,8 @@ def main():
             print("Please enter a valid number")
 
 
-main()
+try:
+    main()
+except KeyboardInterrupt:
+    print("\nProgram Exit")
+    exit()
