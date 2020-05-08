@@ -1,7 +1,10 @@
 # NeuralNet
-Neural networking code for An Introduction to Neural Networks for Beginners.
 
-# Resources
+A supervised neural network with a prediction accuracy of ~90%.
 
-http://deeplearning.stanford.edu/tutorial/  
+# Running the Network
+To run:
 
+```
+python3 neuralNet.py
+```

@@ -1,6 +1,4 @@
-"""Shows the effect of weighting on the sigmoid function
-   From page 6 of the document
-"""
+""" Shows the effect of weighting on the sigmoid function """
 
 import matplotlib.pylab as plt
 import numpy as np
